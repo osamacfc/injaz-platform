@@ -1,212 +1,130 @@
 'use client'
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authHelpers } from '@/lib/supabase'
-import { SCHOOL, TERM, VER } from '@/lib/constants'
+import { SCHOOL, TERM } from '@/lib/constants'
 
 export default function AuthPage() {
-  const [tab,      setTab]      = useState<'login' | 'signup'>('login')
-  const [email,    setEmail]    = useState('')
-  const [pass,     setPass]     = useState('')
-  const [fullName, setFullName] = useState('')
-  const [showP,    setShowP]    = useState(false)
-  const [loading,  setLoading]  = useState(false)
-  const [err,      setErr]      = useState('')
-  const [info,     setInfo]     = useState('')
   const router = useRouter()
+  const [mode, setMode] = useState<'login'|'signup'>('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState('')
+  const [showPass, setShowPass] = useState(false)
 
-  const strength = pass.length === 0 ? 0 : pass.length < 6 ? 1 : pass.length < 10 ? 2 : 3
-  const strengthColors = ['', '#ef4444', '#f59e0b', '#10b981']
-  const strengthLabels = ['', 'ضعيفة', 'مقبولة', 'قوية']
-
-  const doLogin = async () => {
-    if (!email || !pass) { setErr('أدخل البريد وكلمة المرور'); return }
+  const submit = async () => {
+    if (!email || !password) { setErr('أدخل البريد وكلمة المرور'); return }
+    if (mode === 'signup' && !name.trim()) { setErr('أدخل اسمك الثلاثي'); return }
     setLoading(true); setErr('')
     try {
-      await authHelpers.signIn(email, pass)
-      router.replace('/')
-    } catch (e: any) {
-      const msg = e.message ?? ''
-      if (msg.includes('Invalid') || msg.includes('invalid_credentials'))
-        setErr('البريد أو كلمة المرور غير صحيحة')
-      else if (msg.includes('Email not confirmed'))
-        setErr('يرجى تفعيل حسابك من رابط البريد الإلكتروني')
-      else setErr(msg || 'حدث خطأ')
-    }
-    setLoading(false)
-  }
-
-  const doSignUp = async () => {
-    if (fullName.trim().split(' ').filter(Boolean).length < 2)
-      { setErr('أدخل الاسم الثلاثي كاملاً'); return }
-    if (!email.includes('@')) { setErr('البريد الإلكتروني غير صحيح'); return }
-    if (pass.length < 6) { setErr('كلمة المرور 6 أحرف على الأقل'); return }
-    setLoading(true); setErr(''); setInfo('')
-    try {
-      await authHelpers.signUp(email, pass, fullName.trim())
-      setInfo(`✅ تم إنشاء حسابك يا ${fullName.trim().split(' ')[0]}! تحقق من بريدك لتفعيل الحساب.`)
-      setTab('login')
-    } catch (e: any) {
-      setErr(e.message?.includes('already') ? 'هذا البريد مسجّل مسبقاً' : e.message || 'خطأ')
+      if (mode === 'login') {
+        const { session } = await authHelpers.signIn(email, password)
+        if (session) router.replace('/dashboard')
+      } else {
+        await authHelpers.signUp(email, password, name)
+        setErr('✅ تم إنشاء الحساب — تحقق من بريدك لتأكيد التسجيل')
+        setMode('login')
+      }
+    } catch(e:any) {
+      const m = e?.message ?? ''
+      if (m.includes('Invalid login')) setErr('بريد أو كلمة مرور غير صحيحة')
+      else if (m.includes('Email not confirmed')) setErr('يرجى تأكيد بريدك الإلكتروني أولاً')
+      else if (m.includes('already registered')) setErr('هذا البريد مسجّل مسبقاً')
+      else setErr(m || 'حدث خطأ، حاول مرة أخرى')
     }
     setLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-5">
-      <div className="mesh-bg" />
-      {/* Blobs */}
-      <div className="blob" style={{ width: 500, height: 500, background: 'radial-gradient(circle,#c9a84c,transparent 70%)', top: -150, right: -150 }} />
-      <div className="blob" style={{ width: 400, height: 400, background: 'radial-gradient(circle,#10b981,transparent 70%)', bottom: -100, left: -100, animationDelay: '-5s' }} />
+    <div style={{minHeight:'100vh',background:'var(--navy)',display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
+      <div className="mesh"/>
 
-      <div className="relative z-10 w-full max-w-md">
-        {/* Brand */}
-        <div className="animate-fade-up text-center mb-8">
-          <div className="text-5xl mb-3 animate-float">📚</div>
-          <h1 style={{ fontFamily: 'Amiri, serif', fontSize: 28, fontWeight: 700, color: 'var(--gold)', marginBottom: 4 }}>
-            منصة إنجاز تحفيظ عيبان
-          </h1>
-          <p style={{ color: 'var(--tx2)', fontSize: 13 }}>{SCHOOL}</p>
-          <p style={{ color: 'var(--tx3)', fontSize: 12, marginTop: 2 }}>{TERM}</p>
-          <div className="flex justify-center gap-2 mt-3 flex-wrap">
-            {[`v${VER}`, '☁️ Supabase', 'KPI+Seals', 'Real-time'].map(t => (
-              <span key={t} className="badge" style={{ background: 'var(--gold-pale)', color: 'var(--gold)', border: '1px solid rgba(201,168,76,.3)', fontSize: 10 }}>{t}</span>
+      {/* Decorative blobs */}
+      <div style={{position:'fixed',top:'-20%',right:'-10%',width:500,height:500,background:'radial-gradient(circle,rgba(201,168,76,.08),transparent 70%)',borderRadius:'50%',pointerEvents:'none'}}/>
+      <div style={{position:'fixed',bottom:'-20%',left:'-10%',width:400,height:400,background:'radial-gradient(circle,rgba(16,185,129,.06),transparent 70%)',borderRadius:'50%',pointerEvents:'none'}}/>
+
+      <div style={{width:'100%',maxWidth:420}} className="anim-up">
+
+        {/* Logo */}
+        <div style={{textAlign:'center',marginBottom:36}}>
+          <div style={{width:72,height:72,borderRadius:20,background:'linear-gradient(135deg,var(--gold-d),var(--gold))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,margin:'0 auto 16px',boxShadow:'0 8px 40px rgba(201,168,76,.35)'}}>📚</div>
+          <h1 style={{fontFamily:'var(--serif)',fontSize:26,color:'var(--gold)',marginBottom:4}}>منصة إنجاز</h1>
+          <p style={{fontSize:12,color:'var(--tx3)'}}>{SCHOOL}</p>
+          <p style={{fontSize:11,color:'var(--tx3)',marginTop:2,opacity:.6}}>{TERM}</p>
+        </div>
+
+        {/* Card */}
+        <div className="glass" style={{padding:28}}>
+
+          {/* Tabs */}
+          <div style={{display:'flex',background:'rgba(255,255,255,.04)',borderRadius:12,padding:3,marginBottom:24}}>
+            {[{k:'login',l:'تسجيل الدخول'},{k:'signup',l:'حساب جديد'}].map(t=>(
+              <button key={t.k} onClick={()=>{setMode(t.k as any);setErr('')}}
+                style={{flex:1,padding:'9px 0',borderRadius:10,border:'none',cursor:'pointer',fontFamily:'var(--font)',fontSize:13,fontWeight:700,transition:'all .2s',
+                  background:mode===t.k?'linear-gradient(135deg,var(--gold-d),var(--gold))':'transparent',
+                  color:mode===t.k?'#000':'var(--tx3)'}}>
+                {t.l}
+              </button>
             ))}
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-4 p-1 rounded-2xl" style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.06)' }}>
-          {(['login', 'signup'] as const).map(t => (
-            <button key={t} onClick={() => { setTab(t); setErr(''); setInfo('') }}
-              className="flex-1 py-2 rounded-xl font-bold text-sm transition-all"
-              style={{
-                fontFamily: 'Cairo, sans-serif', border: 'none', cursor: 'pointer',
-                background: tab === t ? 'var(--gold-pale)' : 'transparent',
-                color:      tab === t ? 'var(--gold)'      : 'var(--tx2)',
-                borderBottom: tab === t ? '2px solid var(--gold)' : '2px solid transparent',
-              }}>
-              {t === 'login' ? '🔐 دخول' : '✨ حساب جديد'}
-            </button>
-          ))}
-        </div>
-
-        {info && (
-          <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: 'rgba(16,185,129,.1)', border: '1px solid rgba(16,185,129,.3)', color: 'var(--em)' }}>
-            {info}
-          </div>
-        )}
-        {err && (
-          <div className="mb-4 p-3 rounded-xl text-sm flex gap-2 items-center" style={{ background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', color: 'var(--danger)' }}>
-            ⚠️ {err}
-          </div>
-        )}
-
-        {/* Login */}
-        {tab === 'login' && (
-          <div className="glass2 animate-fade-up rounded-2xl p-7">
-            <div className="mb-4">
-              <label className="block text-xs font-black mb-1.5 tracking-widest uppercase" style={{ color: 'var(--gold)' }}>البريد الإلكتروني</label>
-              <div className="relative">
-                <input className="inp" type="email" placeholder="your@email.com" value={email}
-                  onChange={e => { setEmail(e.target.value); setErr('') }}
-                  onKeyDown={e => e.key === 'Enter' && doLogin()}
-                  style={{ paddingRight: 44 }} />
-                <span className="absolute top-1/2 -translate-y-1/2" style={{ right: 14, color: 'var(--tx3)', pointerEvents: 'none' }}>👤</span>
+          {/* Fields */}
+          <div style={{display:'flex',flexDirection:'column',gap:14}}>
+            {mode==='signup'&&(
+              <div>
+                <label style={{fontSize:12,color:'var(--tx3)',display:'block',marginBottom:6}}>الاسم الثلاثي</label>
+                <input className="inp" value={name} onChange={e=>setName(e.target.value)} placeholder="مثال: محمد أحمد الغزواني"/>
               </div>
+            )}
+            <div>
+              <label style={{fontSize:12,color:'var(--tx3)',display:'block',marginBottom:6}}>البريد الإلكتروني</label>
+              <input className="inp" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="osama@injaz.sa" onKeyDown={e=>e.key==='Enter'&&submit()}/>
             </div>
-            <div className="mb-6">
-              <label className="block text-xs font-black mb-1.5 tracking-widest uppercase" style={{ color: 'var(--gold)' }}>كلمة المرور</label>
-              <div className="relative">
-                <input className="inp" type={showP ? 'text' : 'password'} placeholder="كلمة المرور" value={pass}
-                  onChange={e => { setPass(e.target.value); setErr('') }}
-                  onKeyDown={e => e.key === 'Enter' && doLogin()}
-                  style={{ paddingRight: 44, paddingLeft: 44 }} />
-                <span className="absolute top-1/2 -translate-y-1/2" style={{ right: 14, color: 'var(--tx3)', pointerEvents: 'none' }}>🔒</span>
-                <button onClick={() => setShowP(!showP)}
-                  className="absolute top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer"
-                  style={{ left: 14, color: 'var(--tx3)' }}>
-                  {showP ? '🙈' : '👁'}
+            <div>
+              <label style={{fontSize:12,color:'var(--tx3)',display:'block',marginBottom:6}}>كلمة المرور</label>
+              <div style={{position:'relative'}}>
+                <input className="inp" type={showPass?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==='Enter'&&submit()} style={{paddingLeft:40}}/>
+                <button onClick={()=>setShowPass(!showPass)} style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',color:'var(--tx3)',cursor:'pointer',fontSize:14,padding:0}}>
+                  {showPass?'🙈':'👁'}
                 </button>
               </div>
             </div>
-            <button className="btn btn-gold w-full justify-center text-base py-3" onClick={doLogin} disabled={loading}>
-              {loading ? <><Spinner /> جاري التحقق...</> : <>دخول →</>}
-            </button>
-            <div className="text-center mt-4 text-xs" style={{ color: 'var(--tx3)' }}>
-              ليس لديك حساب؟{' '}
-              <button onClick={() => { setTab('signup'); setErr('') }}
-                className="bg-transparent border-none cursor-pointer font-bold"
-                style={{ color: 'var(--gold)', fontFamily: 'Cairo, sans-serif', fontSize: 12 }}>
-                سجّل اسمك الآن
-              </button>
-            </div>
-            {/* Guest */}
-            <div className="mt-4 p-3 rounded-xl text-center" style={{ background: 'rgba(16,185,129,.05)', border: '1px solid rgba(16,185,129,.15)' }}>
-              <div className="text-xs mb-2" style={{ color: 'var(--tx3)' }}>تريد تصفح الملفات بدون تسجيل دخول؟</div>
-              <button className="btn w-full justify-center" onClick={() => router.push('/guest')}
-                style={{ background: 'linear-gradient(135deg,var(--em),var(--em-d))', color: '#fff', fontFamily: 'Cairo, sans-serif' }}>
-                👁 دخول كزائر — عرض الملفات
-              </button>
-            </div>
           </div>
-        )}
 
-        {/* SignUp */}
-        {tab === 'signup' && (
-          <div className="glass2 animate-fade-up rounded-2xl p-7">
-            <div className="p-3 rounded-xl mb-5 text-xs" style={{ background: 'rgba(201,168,76,.06)', border: '1px solid rgba(201,168,76,.15)', color: 'var(--gold)' }}>
-              🏫 إنشاء حساب ضمن منصة {SCHOOL}
+          {/* Error */}
+          {err&&(
+            <div style={{marginTop:14,padding:'10px 14px',borderRadius:10,background:err.startsWith('✅')?'rgba(16,185,129,.1)':'rgba(239,68,68,.1)',border:`1px solid ${err.startsWith('✅')?'rgba(16,185,129,.2)':'rgba(239,68,68,.2)'}`,fontSize:12,color:err.startsWith('✅')?'var(--em)':'var(--danger)'}}>
+              {err}
             </div>
-            <div className="mb-4">
-              <label className="block text-xs font-black mb-1.5 tracking-widest uppercase" style={{ color: 'var(--gold)' }}>الاسم الثلاثي الكامل</label>
-              <input className="inp" type="text" placeholder="مثال: أسامة حيان المالكي" value={fullName}
-                onChange={e => { setFullName(e.target.value); setErr('') }} />
-              <p className="text-xs mt-1" style={{ color: 'var(--tx3)' }}>يُستخدم في ملف الإنجاز وشهادات التقدير</p>
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-black mb-1.5 tracking-widest uppercase" style={{ color: 'var(--gold)' }}>البريد الإلكتروني</label>
-              <input className="inp" type="email" placeholder="your@email.com" value={email}
-                onChange={e => { setEmail(e.target.value); setErr('') }} />
-            </div>
-            <div className="mb-6">
-              <label className="block text-xs font-black mb-1.5 tracking-widest uppercase" style={{ color: 'var(--gold)' }}>كلمة المرور</label>
-              <div className="relative">
-                <input className="inp" type={showP ? 'text' : 'password'} placeholder="اختر كلمة مرور قوية" value={pass}
-                  onChange={e => { setPass(e.target.value); setErr('') }}
-                  style={{ paddingLeft: 44 }} />
-                <button onClick={() => setShowP(!showP)}
-                  className="absolute top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer"
-                  style={{ left: 14, color: 'var(--tx3)' }}>
-                  {showP ? '🙈' : '👁'}
-                </button>
-              </div>
-              {pass.length > 0 && (
-                <div className="flex gap-1 mt-2 items-center">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex-1 h-1 rounded-full transition-all"
-                      style={{ background: strength >= i ? strengthColors[strength] : 'rgba(255,255,255,.1)' }} />
-                  ))}
-                  <span className="text-xs mr-1" style={{ color: strengthColors[strength], minWidth: 40 }}>
-                    {strengthLabels[strength]}
-                  </span>
-                </div>
-              )}
-            </div>
-            <button className="btn btn-gold w-full justify-center text-base py-3" onClick={doSignUp} disabled={loading}>
-              {loading ? <><Spinner /> جاري الإنشاء...</> : 'إنشاء الحساب ✨'}
-            </button>
+          )}
+
+          {/* Submit */}
+          <button onClick={submit} disabled={loading} className="btn-gold"
+            style={{width:'100%',padding:'13px 0',marginTop:20,fontSize:15,borderRadius:12,opacity:loading?.6:1}}>
+            {loading?'⏳ جاري التحقق...':(mode==='login'?'دخول ←':'إنشاء حساب ←')}
+          </button>
+
+          {/* Divider */}
+          <div style={{display:'flex',alignItems:'center',gap:12,margin:'20px 0'}}>
+            <div className="sep" style={{flex:1}}/>
+            <span style={{fontSize:11,color:'var(--tx3)'}}>أو</span>
+            <div className="sep" style={{flex:1}}/>
           </div>
-        )}
+
+          {/* Guest */}
+          <button onClick={()=>router.push('/guest')} className="btn-ghost"
+            style={{width:'100%',padding:'11px 0',fontSize:13,borderRadius:12}}>
+            👁 دخول كزائر — عرض الملفات العامة
+          </button>
+        </div>
+
+        {/* Footer */}
+        <p style={{textAlign:'center',fontSize:11,color:'var(--tx3)',marginTop:20,opacity:.6}}>
+          منصة إنجاز تحفيظ عيبان v9.0 — جميع الحقوق محفوظة
+        </p>
       </div>
     </div>
-  )
-}
-
-function Spinner() {
-  return (
-    <span className="inline-block w-4 h-4 border-2 rounded-full animate-spin"
-      style={{ borderColor: 'rgba(0,0,0,.2)', borderTopColor: '#000' }} />
   )
 }
