@@ -31,7 +31,7 @@ export default function GuestPage() {
     setLoading(false)
   }
 
-  const filtered = useMemo(()=> search.trim() ? profiles.filter(p=>(p.full_name||'').includes(search.trim())) : profiles, [profiles,search])
+  const filtered = useMemo(()=> search.trim() ? profiles.filter(p=>(p.full_name||p.name||'').includes(search.trim())) : profiles, [profiles,search])
   const totalEvs = evs.length
   const coveredSecs = new Set(evs.map(e=>e.sid)).size
   const avgProg = profiles.length>0 ? Math.round(profiles.reduce((a,p)=>a+calcProgress(evs,p.id),0)/profiles.length) : 0
@@ -83,7 +83,7 @@ export default function GuestPage() {
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         <nav className="nav-bar">
           <button onClick={()=>setSelTeacher(null)} className="btn-ghost" style={{padding:'7px 14px',fontSize:12}}>← رجوع</button>
-          <span style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:15}}>{selTeacher.full_name}</span>
+          <span style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:15}}>{selTeacher.full_name||selTeacher.name}</span>
           <button onClick={()=>router.push('/auth')} className="btn-ghost" style={{padding:'7px 14px',fontSize:12}}>🔐 دخول</button>
         </nav>
         <div className="page">
@@ -92,7 +92,7 @@ export default function GuestPage() {
             <div style={{display:'flex',gap:16,alignItems:'center',flexWrap:'wrap'}}>
               <div className="av" style={{width:64,height:64,background:`linear-gradient(135deg,${col},${col}88)`,fontSize:20,boxShadow:`0 6px 24px ${col}55`}}>{selTeacher.av}</div>
               <div style={{flex:1}}>
-                <h2 style={{fontFamily:'var(--serif)',fontSize:20,color:'var(--gold)',marginBottom:4}}>{selTeacher.full_name}</h2>
+                <h2 style={{fontFamily:'var(--serif)',fontSize:20,color:'var(--gold)',marginBottom:4}}>{selTeacher.full_name||selTeacher.name}</h2>
                 <p style={{color:'var(--tx3)',fontSize:12}}>{ROLE_LABELS[selTeacher.role]} • {SCHOOL}</p>
                 <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
                   {[{v:tEvs.length,l:'شاهد',c:'var(--gold)'},{v:`${prog}%`,l:'الإنجاز',c:pColor(prog)},{v:new Set(tEvs.map(e=>e.sid)).size,l:'قسم',c:'var(--em)'}].map((s,i)=>(
@@ -201,7 +201,7 @@ export default function GuestPage() {
                     onMouseDown={()=>{setSelTeacher(p);setSearch('');setShowDrop(false)}}>
                     <div className="av" style={{width:36,height:36,background:`linear-gradient(135deg,${col},${col}88)`,fontSize:12}}>{p.av}</div>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontWeight:700,fontSize:13,color:'var(--tx)'}}>{p.full_name}</div>
+                      <div style={{fontWeight:700,fontSize:13,color:'var(--tx)'}}>{p.full_name||p.name}</div>
                       <div style={{fontSize:11,color:col}}>{ROLE_LABELS[p.role]}</div>
                     </div>
                     <div style={{fontSize:13,fontWeight:900,color:pColor(prog)}}>{prog}%</div>
@@ -227,7 +227,7 @@ export default function GuestPage() {
                 <div style={{display:'flex',gap:10,alignItems:'center',marginBottom:12}}>
                   <div className="av" style={{width:40,height:40,background:`linear-gradient(135deg,${col},${col}88)`,fontSize:13,flexShrink:0}}>{p.av}</div>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:700,fontSize:13,color:'var(--tx)',lineHeight:1.3,marginBottom:3}}>{p.full_name}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:'var(--tx)',lineHeight:1.3,marginBottom:3}}>{p.full_name||p.name}</div>
                     <span className="badge" style={{fontSize:10,background:`${col}12`,color:col,border:`1px solid ${col}25`}}>{ROLE_LABELS[p.role]}</span>
                   </div>
                 </div>
