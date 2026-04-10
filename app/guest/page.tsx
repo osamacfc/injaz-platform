@@ -83,7 +83,7 @@ export default function GuestPage() {
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         <nav className="nav-bar">
           <button onClick={()=>setSelTeacher(null)} className="btn-ghost" style={{padding:'7px 14px',fontSize:12}}>← رجوع</button>
-          <span style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:15}}>{selTeacher.full_name||selTeacher.name}</span>
+          <span style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:15}}>{selTeacher.full_name}</span>
           <button onClick={()=>router.push('/auth')} className="btn-ghost" style={{padding:'7px 14px',fontSize:12}}>🔐 دخول</button>
         </nav>
         <div className="page">
@@ -92,7 +92,7 @@ export default function GuestPage() {
             <div style={{display:'flex',gap:16,alignItems:'center',flexWrap:'wrap'}}>
               <div className="av" style={{width:64,height:64,background:`linear-gradient(135deg,${col},${col}88)`,fontSize:20,boxShadow:`0 6px 24px ${col}55`}}>{selTeacher.av}</div>
               <div style={{flex:1}}>
-                <h2 style={{fontFamily:'var(--serif)',fontSize:20,color:'var(--gold)',marginBottom:4}}>{selTeacher.full_name||selTeacher.name}</h2>
+                <h2 style={{fontFamily:'var(--serif)',fontSize:20,color:'var(--gold)',marginBottom:4}}>{selTeacher.full_name}</h2>
                 <p style={{color:'var(--tx3)',fontSize:12}}>{ROLE_LABELS[selTeacher.role]} • {SCHOOL}</p>
                 <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
                   {[{v:tEvs.length,l:'شاهد',c:'var(--gold)'},{v:`${prog}%`,l:'الإنجاز',c:pColor(prog)},{v:new Set(tEvs.map(e=>e.sid)).size,l:'قسم',c:'var(--em)'}].map((s,i)=>(
