@@ -31,7 +31,7 @@ export default function GuestPage() {
     setLoading(false)
   }
 
-  const filtered = useMemo(()=> search.trim() ? profiles.filter(p=>(p.full_name||p.name||'').includes(search.trim())) : profiles, [profiles,search])
+  const filtered = useMemo(()=> search.trim() ? profiles.filter(p=>(p.full_name||').includes(search.trim())) : profiles, [profiles,search])
   const totalEvs = evs.length
   const coveredSecs = new Set(evs.map(e=>e.sid)).size
   const avgProg = profiles.length>0 ? Math.round(profiles.reduce((a,p)=>a+calcProgress(evs,p.id),0)/profiles.length) : 0
@@ -201,7 +201,7 @@ export default function GuestPage() {
                     onMouseDown={()=>{setSelTeacher(p);setSearch('');setShowDrop(false)}}>
                     <div className="av" style={{width:36,height:36,background:`linear-gradient(135deg,${col},${col}88)`,fontSize:12}}>{p.av}</div>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontWeight:700,fontSize:13,color:'var(--tx)'}}>{p.full_name||p.name}</div>
+                      <div style={{fontWeight:700,fontSize:13,color:'var(--tx)'}}>{p.full_name}</div>
                       <div style={{fontSize:11,color:col}}>{ROLE_LABELS[p.role]}</div>
                     </div>
                     <div style={{fontSize:13,fontWeight:900,color:pColor(prog)}}>{prog}%</div>
@@ -227,7 +227,7 @@ export default function GuestPage() {
                 <div style={{display:'flex',gap:10,alignItems:'center',marginBottom:12}}>
                   <div className="av" style={{width:40,height:40,background:`linear-gradient(135deg,${col},${col}88)`,fontSize:13,flexShrink:0}}>{p.av}</div>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontWeight:700,fontSize:13,color:'var(--tx)',lineHeight:1.3,marginBottom:3}}>{p.full_name||p.name}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:'var(--tx)',lineHeight:1.3,marginBottom:3}}>{p.full_name}</div>
                     <span className="badge" style={{fontSize:10,background:`${col}12`,color:col,border:`1px solid ${col}25`}}>{ROLE_LABELS[p.role]}</span>
                   </div>
                 </div>
@@ -244,3 +244,4 @@ export default function GuestPage() {
     </div>
   )
 }
+
