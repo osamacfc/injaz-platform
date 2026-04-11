@@ -31,11 +31,11 @@ export default function GuestPage() {
     setLoading(false)
   }
 
-  const filtered = useMemo(()=> search.trim() ? profiles.filter(p=>(p.full_name||').includes(search.trim())) : profiles, [profiles,search])
+  const filtered = useMemo(()=> search.trim() ? profiles.filter(p=>(p.full_name||'').includes(search.trim())) : profiles, [profiles,search])
   const totalEvs = evs.length
   const coveredSecs = new Set(evs.map(e=>e.sid)).size
   const avgProg = profiles.length>0 ? Math.round(profiles.reduce((a,p)=>a+calcProgress(evs,p.id),0)/profiles.length) : 0
-  const topTeacher = profiles.sort((a,b)=>calcProgress(evs,b.id)-calcProgress(evs,a.id))[0]
+  const topTeacher = [...profiles].sort((a,b)=>calcProgress(evs,b.id)-calcProgress(evs,a.id))[0]
 
   if (!auth) return (
     <div style={{minHeight:'100vh',background:'var(--navy)',display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
@@ -48,14 +48,11 @@ export default function GuestPage() {
         </div>
         <div className="glass" style={{padding:24}}>
           <label style={{fontSize:12,color:'var(--tx3)',display:'block',marginBottom:8}}>رمز الدخول</label>
-          <input className="inp" value={code} onChange={e=>setCode(e.target.value)} placeholder="أدخل الرمز" style={{textAlign:'center',fontSize:22,letterSpacing:8,marginBottom:14}} onKeyDown={e=>e.key==='Enter'&&verify()}
-            autoFocus/>
+          <input className="inp" value={code} onChange={e=>setCode(e.target.value)} placeholder="أدخل الرمز" style={{textAlign:'center',fontSize:22,letterSpacing:8,marginBottom:14}} onKeyDown={e=>e.key==='Enter'&&verify()} autoFocus/>
           {codeErr&&<p style={{color:'var(--danger)',fontSize:12,textAlign:'center',marginBottom:10}}>❌ رمز غير صحيح</p>}
           <button onClick={verify} className="btn-gold" style={{width:'100%',padding:'12px 0',fontSize:14,borderRadius:12}}>دخول ←</button>
           <hr className="sep" style={{margin:'16px 0'}}/>
-          <button onClick={()=>router.push('/auth')} className="btn-ghost" style={{width:'100%',padding:'10px 0',fontSize:13,borderRadius:12}}>
-            🔐 تسجيل الدخول بحساب
-          </button>
+          <button onClick={()=>router.push('/auth')} className="btn-ghost" style={{width:'100%',padding:'10px 0',fontSize:13,borderRadius:12}}>🔐 تسجيل الدخول بحساب</button>
         </div>
       </div>
     </div>
@@ -83,16 +80,16 @@ export default function GuestPage() {
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         <nav className="nav-bar">
           <button onClick={()=>setSelTeacher(null)} className="btn-ghost" style={{padding:'7px 14px',fontSize:12}}>← رجوع</button>
-          <span style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:15}}>{selTeacher.full_name||selTeacher.name}</span>
+          <span style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:15}}>{selTeacher.full_name}</span>
           <button onClick={()=>router.push('/auth')} className="btn-ghost" style={{padding:'7px 14px',fontSize:12}}>🔐 دخول</button>
         </nav>
         <div className="page">
-          <div className="glass" style={{padding:24,marginBottom:20}} className="anim-up">
+          <div className="glass" style={{padding:24,marginBottom:20}}>
             <div style={{height:3,background:`linear-gradient(90deg,${col},#c9a84c,#e8c96d)`,borderRadius:2,marginBottom:20}}/>
             <div style={{display:'flex',gap:16,alignItems:'center',flexWrap:'wrap'}}>
               <div className="av" style={{width:64,height:64,background:`linear-gradient(135deg,${col},${col}88)`,fontSize:20,boxShadow:`0 6px 24px ${col}55`}}>{selTeacher.av}</div>
               <div style={{flex:1}}>
-                <h2 style={{fontFamily:'var(--serif)',fontSize:20,color:'var(--gold)',marginBottom:4}}>{selTeacher.full_name||selTeacher.name}</h2>
+                <h2 style={{fontFamily:'var(--serif)',fontSize:20,color:'var(--gold)',marginBottom:4}}>{selTeacher.full_name}</h2>
                 <p style={{color:'var(--tx3)',fontSize:12}}>{ROLE_LABELS[selTeacher.role]} • {SCHOOL}</p>
                 <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
                   {[{v:tEvs.length,l:'شاهد',c:'var(--gold)'},{v:`${prog}%`,l:'الإنجاز',c:pColor(prog)},{v:new Set(tEvs.map(e=>e.sid)).size,l:'قسم',c:'var(--em)'}].map((s,i)=>(
@@ -106,7 +103,7 @@ export default function GuestPage() {
             </div>
           </div>
           {SECTIONS.filter(s=>tEvs.some(e=>e.sid===s.id)).map(sec=>(
-            <div key={sec.id} className="glass2" style={{marginBottom:14,overflow:'hidden'}} className="anim-up">
+            <div key={sec.id} className="glass2" style={{marginBottom:14,overflow:'hidden'}}>
               <div style={{height:3,background:`linear-gradient(90deg,${sec.color},${sec.color}40)`}}/>
               <div style={{padding:'12px 16px',background:`${sec.color}06`,borderBottom:`1px solid ${sec.color}15`,display:'flex',alignItems:'center',gap:8}}>
                 <span style={{fontSize:18}}>{sec.icon}</span>
@@ -141,7 +138,6 @@ export default function GuestPage() {
     <div style={{minHeight:'100vh',background:'var(--navy)'}}>
       <div className="mesh"/>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
-
       <nav className="nav-bar">
         <div style={{display:'flex',alignItems:'center',gap:10}}>
           <div style={{width:32,height:32,borderRadius:8,background:'linear-gradient(135deg,var(--gold-d),var(--gold))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>📚</div>
@@ -151,13 +147,11 @@ export default function GuestPage() {
       </nav>
 
       <div className="page">
-        {/* Header */}
         <div style={{textAlign:'center',marginBottom:32,paddingTop:8}} className="anim-up">
           <h1 style={{fontFamily:'var(--serif)',fontSize:28,color:'var(--gold)',marginBottom:6}}>{SCHOOL}</h1>
           <p style={{color:'var(--tx3)',fontSize:13}}>{TERM} • ملفات الإنجاز الوظيفي</p>
         </div>
 
-        {/* Stats */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:10,marginBottom:28}} className="stagger">
           {[
             {v:profiles.length,l:'معلم',c:'var(--gold)',icon:'👨‍🏫'},
@@ -173,19 +167,17 @@ export default function GuestPage() {
           ))}
         </div>
 
-        {/* Top teacher */}
         {topTeacher&&(
-          <div className="glass-gold" style={{padding:16,marginBottom:24,display:'flex',alignItems:'center',gap:14}} className="anim-up">
+          <div className="glass-role" style={{padding:16,marginBottom:24,display:'flex',alignItems:'center',gap:14}}>
             <div style={{fontSize:28}}>🥇</div>
             <div style={{flex:1}}>
               <div style={{fontSize:12,color:'var(--tx3)',marginBottom:2}}>الأعلى إنجازاً هذا الفصل</div>
-              <div style={{fontWeight:700,fontSize:15,color:'var(--tx)'}}>{topTeacher.full_name||topTeacher.name}</div>
+              <div style={{fontWeight:700,fontSize:15,color:'var(--tx)'}}>{topTeacher.full_name}</div>
             </div>
             <div style={{fontSize:20,fontWeight:900,color:'var(--gold)'}}>{calcProgress(evs,topTeacher.id)}%</div>
           </div>
         )}
 
-        {/* Search with dropdown */}
         <div style={{position:'relative',marginBottom:24}} className="anim-up">
           <input className="inp" value={search} onChange={e=>{setSearch(e.target.value);setShowDrop(true)}} onFocus={()=>setShowDrop(true)} onBlur={()=>setTimeout(()=>setShowDrop(false),200)}
             placeholder="🔍 ابحث باسم المعلم..." style={{paddingRight:44}}/>
@@ -212,7 +204,6 @@ export default function GuestPage() {
           )}
         </div>
 
-        {/* Teachers grid */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:12}} className="stagger">
           {filtered.map((p,i)=>{
             const prog=calcProgress(evs,p.id)
@@ -244,7 +235,3 @@ export default function GuestPage() {
     </div>
   )
 }
-
-
-
-
