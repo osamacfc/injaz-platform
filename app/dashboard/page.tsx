@@ -150,7 +150,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Section Coverage */}
-        <div className="glass" style={{padding:20,marginBottom:24}} className="anim-up">
+        <div className="glass anim-up" style={{padding:20,marginBottom:24}}>
           <h3 style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:16,marginBottom:14}}>📂 تغطية الأقسام الـ 13</h3>
           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
             {SECTIONS.map(s=>{
