@@ -125,7 +125,7 @@ export default function DashboardPage() {
         </div>
 
         {/* KPI Coverage */}
-        <div className="glass anim-up" style={{padding:20,marginBottom:24}}>
+        className="glass anim-up" style={{padding:20,marginBottom:24}}
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
             <h3 style={{fontFamily:'var(--serif)',color:'var(--gold)',fontSize:16}}>🎯 تغطية المعايير المهنية</h3>
             <span className="badge badge-gold">{coveredKpis}/{KPI_STANDARDS.length}</span>
